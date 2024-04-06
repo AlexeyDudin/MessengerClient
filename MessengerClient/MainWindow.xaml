@@ -24,7 +24,8 @@
             AutoGenerateColumns="False"
             CanUserAddRows="False"
             CanUserDeleteRows="False"
-            ItemsSource="{Binding ElementName=MainWindowForm, Path=UserRepo.Values, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}">
+            ItemsSource="{Binding ElementName=MainWindowForm, Path=UserRepo.Values, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+            SelectedItem="{Binding ElementName=MainWindowForm, Path=SelectedUser, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             <DataGrid.Columns>
                 <DataGridTextColumn
                     Width="100*"
@@ -33,6 +34,6 @@
             </DataGrid.Columns>
         </DataGrid>
         <GridSplitter Grid.Column="1" />
-        <local:MessagesPage Grid.Column="2" />
+        <local:MessagesPage Grid.Column="2" DataContext="{Binding ElementName=MainWindowForm, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
     </Grid>
 </metro:MetroWindow>

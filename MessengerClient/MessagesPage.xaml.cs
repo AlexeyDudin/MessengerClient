@@ -26,11 +26,13 @@ namespace MessengerClient
             InitializeComponent();
         }
 
-        private async Task Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
+            IMainWindow mainWindow = (IMainWindow)DataContext;
             MessageDto newMessage = new MessageDto()
             {
-                From = 
+                From =  mainWindow.MyLogin,
+                ToUser = mainWindow.SelectedUser.Login
             };
         }
     }

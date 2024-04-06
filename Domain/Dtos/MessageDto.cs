@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Domain.Dtos
 {
-    public class MessageDto : INotifyPropertyChanged
+    public class MessageDto : IDomain<MessageDto>, INotifyPropertyChanged
     {
         private string message = "";
         private string from = "";
@@ -71,6 +71,17 @@ namespace Domain.Dtos
         {
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public void ChangeValues(MessageDto newElem)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool AreEqual(MessageDto newElem)
+        {
+            throw new NotImplementedException();
+        }
+
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
     }
 }

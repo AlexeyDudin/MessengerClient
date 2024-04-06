@@ -18,9 +18,9 @@ namespace MessengerClient
         private string endPoint = "";
         private Repository<MessageDto> messageRepo;
         private Repository<UserDto> userRepo;
-        private string jwtToken = "";
         private UserDto selectedUser;
         private string myLogin;
+        private string jwtToken = "";
         public MainWindow()
         {
             InitializeComponent();
@@ -54,9 +54,8 @@ namespace MessengerClient
             {
                 selectedUser = value;
                 OnPropertyChanged(nameof(SelectedUser));
-            }
+            } 
         }
-
         public string MyLogin 
         { 
             get => myLogin;

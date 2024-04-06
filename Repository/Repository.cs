@@ -1,10 +1,12 @@
-﻿using Domain.Dtos;
+﻿using Domain;
+using Domain.Dtos;
 using Infrastructure;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repository
@@ -16,7 +18,7 @@ namespace Repository
         protected HubConnection hubConnection;
         protected string jwtToken = "";
 
-        public Repository(string baseUrl, string jwtToken = "", string subscribeUrl = "", string subscribeFuncName = "")
+        public Repository(string baseUrl, string jwtToken = "", string subscribeUrl = "", string subscribeAddFuncName = "", string subscribeEditFuncName = "")
         {
             this.baseUrl = baseUrl;
             this.jwtToken = jwtToken;
@@ -27,11 +29,31 @@ namespace Repository
                     hubConnection = new HubConnectionBuilder()
                         .WithUrl(baseUrl + subscribeUrl)
                         .Build();
-                    // регистрируем функцию Receive для получения данных
-                    hubConnection.On<T>(subscribeFuncName, (value) =>
+                    if (!string.IsNullOrEmpty(subscribeAddFuncName))
                     {
-                        Values.Add(value);
-                    });
+                        // регистрируем функцию Receive для получения данных
+                        hubConnection.On<T>(subscribeAddFuncName, (value) =>
+                        {
+                            Values.Add(value);
+                        });
+                    }
+                    if (!string.IsNullOrEmpty(subscribeEditFuncName))
+                    {
+                        hubConnection.On<T>(subscribeEditFuncName, (T value) =>
+                        {
+                            IDomain<T> domainElem = value as IDomain<T>;
+                            IDomain<T> foundedValue = null;
+                            foreach (IDomain<T> elem in Values)
+                            {
+                                if (elem.UniqueId == domainElem.UniqueId)
+                                {
+                                    foundedValue.ChangeValues(value);
+                                    break;
+                                }
+                            }
+                        });
+                    }
+
 
                     Task.Run(async () => await hubConnection.StartAsync()).Wait();
                 }

@@ -31,9 +31,15 @@ namespace MessengerClient
             IMainWindow mainWindow = (IMainWindow)DataContext;
             MessageDto newMessage = new MessageDto()
             {
-                From =  mainWindow.MyLogin,
-                ToUser = mainWindow.SelectedUser.Login
+                From = mainWindow.MyLogin,
+                Message = MessageTextBox.Text
             };
+            if (mainWindow.SelectedUser != null)
+            {
+                newMessage.ToUser = mainWindow.SelectedUser.Login;
+            }
+            mainWindow.MessageRepo.Add(newMessage);
+            MessageTextBox.Text = string.Empty;
         }
     }
 }

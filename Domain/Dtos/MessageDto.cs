@@ -32,7 +32,7 @@ namespace Domain.Dtos
         }
         public string ToUser
         {
-            get => ToUser;
+            get => toUser;
             set
             {
                 toUser = value; 

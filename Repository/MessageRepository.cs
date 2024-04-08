@@ -1,5 +1,7 @@
-﻿using Domain.Dtos;
+﻿using Domain;
+using Domain.Dtos;
 using Infrastructure;
+using Microsoft.AspNetCore.SignalR.Client;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
@@ -9,9 +11,10 @@ namespace Repository
     public class MessageRepository : Repository<MessageDto>
     {
         private static string fillMessagesUrl = "/api/messages";
-        private static string addMessagesUrl = "/api/user/add";
-        private static string deleteMessagesUrl = "/api/user/delete";
-        public MessageRepository(string baseUrl, string jwtToken = "") : base(baseUrl, jwtToken, "/messages", "RecieveMessage")
+        private static string addMessagesUrl = string.Empty; //"/api/user/add";
+        private static string deleteMessagesUrl = string.Empty; //"/api/user/delete";
+        private static string editMessagesUrl = string.Empty; //"/api/"
+        public MessageRepository(string baseUrl, string jwtToken = "") : base(baseUrl, jwtToken, new HubConnectionSettings("/messages", "RecieveMessage", "EditMessage", "DeleteMessage"))
         {
         }
 
@@ -19,27 +22,62 @@ namespace Repository
         {
             Task.Run(async () =>
             {
-                var userLogin = jwtToken.DecodeJWTPayload("userLogin");
                 Values = await HttpRequester.SendRequestAsync<ObservableCollection<MessageDto>>(baseUrl + fillMessagesUrl, HttpRequestType.GET, jwtToken, userLogin);
             });
         }
 
-        public override async void Values_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        protected override void SendAddRequestToHub(MessageDto value)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
+            Task.Run(async () =>
             {
-                foreach (var elem in e.NewItems)
+                if (hubConnection != null)
                 {
-                    var result = await HttpRequester.SendRequestAsync<MessageDto>(baseUrl + addMessagesUrl, HttpRequestType.POST, jwtToken, elem);
+                    await hubConnection.InvokeAsync("Add", value);
                 }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            });
+        }
+
+        protected override void SendAddRequestToServer(MessageDto value)
+        {
+            //Task.Run(async () =>
+            //{
+            //    if (!string.IsNullOrEmpty(addMessagesUrl))
+            //    {
+            //        var newElem = await HttpRequester.SendRequestAsync<MessageDto>(baseUrl + addMessagesUrl, HttpRequestType.POST, jwtToken, value);
+            //    }
+            //});
+        }
+
+        protected override void SendDeleteRequestToHub(MessageDto value)
+        {
+            Task.Run(async () =>
             {
-                foreach (var elem in e.OldItems)
+                if (hubConnection != null)
                 {
-                    var result = await HttpRequester.SendRequestAsync<MessageDto>(baseUrl + deleteMessagesUrl, HttpRequestType.DELETE, jwtToken, elem);
+                    await hubConnection.InvokeAsync("Delete", value);
                 }
-            }
+            });
+        }
+
+        protected override void SendDeleteRequestToServer(MessageDto value)
+        {
+            //throw new System.NotImplementedException();
+        }
+
+        protected override void SendEditRequestToHub(MessageDto value)
+        {
+            Task.Run(async () =>
+            {
+                if (hubConnection != null)
+                {
+                    await hubConnection.InvokeAsync("Edit", value);
+                }
+            });
+        }
+
+        protected override void SendEditRequestToServer(MessageDto value)
+        {
+            //throw new System.NotImplementedException();
         }
     }
 }

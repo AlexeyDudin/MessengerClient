@@ -52,6 +52,7 @@
     <Compile Include="Dtos\RoleDto.cs" />
     <Compile Include="Dtos\UserDto.cs" />
     <Compile Include="Dtos\UserState.cs" />
+    <Compile Include="HubConnectionSettings.cs" />
     <Compile Include="IDomain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

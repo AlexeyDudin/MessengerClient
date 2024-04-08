@@ -19,10 +19,12 @@
                 <ColumnDefinition />
                 <ColumnDefinition Width="150" />
             </Grid.ColumnDefinitions>
-            <RichTextBox
-                x:Name="TextBox"
+            <TextBox
+                x:Name="MessageTextBox"
                 Grid.Column="0"
-                Margin="5" />
+                Margin="5"
+                AcceptsReturn="True"
+                AcceptsTab="True" />
             <Button
                 Grid.Column="1"
                 Margin="5"

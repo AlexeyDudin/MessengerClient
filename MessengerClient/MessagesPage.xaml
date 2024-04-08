@@ -23,28 +23,28 @@
             <RowDefinition MinHeight="50" MaxHeight="100" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <ListBox x:Name="ListingDataView" ItemsSource="{Binding Source={StaticResource Filtered}}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock
-                                Grid.Column="0"
-                                HorizontalAlignment="Left"
-                                Text="{Binding Path=From, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Grid.Column="1" Text="{Binding Path=Message, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock
-                                Grid.Column="2"
-                                HorizontalAlignment="Right"
-                                Text="{Binding Path=TimeStamp, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource TimeConverter}}" />
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <DataGrid
+                x:Name="ListingDataView"
+                AutoGenerateColumns="False"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                CanUserReorderColumns="False"
+                GridLinesVisibility="All"
+                HeadersVisibility="None"
+                ItemsSource="{Binding Source={StaticResource Filtered}}"
+                SelectionUnit="FullRow">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding Path=From, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
+                    <DataGridTextColumn Width="100*" Binding="{Binding Path=Message, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
+                    <DataGridTextColumn Width="150" Binding="{Binding Path=TimeStamp, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource TimeConverter}}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -61,7 +61,7 @@
                 Grid.Column="1"
                 Margin="5"
                 Click="Button_Click"
-                Content="Сохранить" />
+                Content="Отправить" />
         </Grid>
     </Grid>
 </UserControl>

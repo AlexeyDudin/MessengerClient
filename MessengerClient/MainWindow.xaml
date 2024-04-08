@@ -4,11 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:MessengerClient.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:local="clr-namespace:MessengerClient"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
     x:Name="MainWindowForm"
-    Title="MainWindow"
+    Title="Чат"
     Width="800"
     Height="450"
     Closing="MainWindowForm_Closing"
@@ -17,6 +18,11 @@
     <metro:MetroWindow.Resources>
         <converters:StateConverter x:Key="StateConverter" />
     </metro:MetroWindow.Resources>
+    <metro:MetroWindow.IconTemplate>
+        <DataTemplate>
+            <iconPacks:PackIconUnicons Margin="10,7,0,5" Kind="Chat" />
+        </DataTemplate>
+    </metro:MetroWindow.IconTemplate>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="30*" />

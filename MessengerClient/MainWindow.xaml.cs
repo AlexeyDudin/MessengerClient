@@ -3,7 +3,9 @@ using Infrastructure;
 using MahApps.Metro.Controls;
 using Repository;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -21,6 +23,7 @@ namespace MessengerClient
         private UserDto selectedUser;
         private string myLogin;
         private string jwtToken = "";
+        private ObservableCollection<MessageDto> viewMessages;
         public MainWindow()
         {
             InitializeComponent();
@@ -54,7 +57,15 @@ namespace MessengerClient
             {
                 selectedUser = value;
                 OnPropertyChanged(nameof(SelectedUser));
+                UpdateShowMessages();
             } 
+        }
+        public void UpdateShowMessages()
+        {
+            if (selectedUser != null)
+            {
+                ViewMessages = new ObservableCollection<MessageDto>(MessageRepo.Values.Where(m => m.ToUser == selectedUser.Login || m.From == selectedUser.Login));
+            }
         }
         public string MyLogin 
         { 
@@ -63,6 +74,16 @@ namespace MessengerClient
             {
                 myLogin = value;
                 OnPropertyChanged(nameof(MyLogin));
+            }
+        }
+
+        public ObservableCollection<MessageDto> ViewMessages 
+        { 
+            get => viewMessages;
+            set
+            {
+                viewMessages = value;
+                OnPropertyChanged(nameof(ViewMessages));
             }
         }
 
@@ -85,11 +106,18 @@ namespace MessengerClient
         }
         private void AuthUser()
         {
-            Task.Run(async () =>
+            try
             {
-                jwtToken = await HttpRequester.SendRequestAsync<string>(endPoint + loginUrl, HttpRequestType.GET, null, "Admin", "1");
-                MyLogin = jwtToken.DecodeJWTPayload("userLogin");
-            }).Wait();
+                Task.Run(async () =>
+                {
+                    jwtToken = await HttpRequester.SendRequestAsync<string>(endPoint + loginUrl, HttpRequestType.GET, null, "Admin", "1");
+                    MyLogin = jwtToken.DecodeJWTPayload("userLogin");
+                }).Wait();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
         private void LoadUsers()
         {

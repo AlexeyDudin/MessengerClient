@@ -1,9 +1,11 @@
-﻿using Domain.Dtos;
+﻿using Domain;
+using Domain.Dtos;
 using Infrastructure;
 using Microsoft.AspNetCore.SignalR.Client;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace Repository
 {
@@ -13,8 +15,12 @@ namespace Repository
         private static string addUserUrl = "/api/user/add";
         private static string deleteUserUrl = "/api/user/delete";
         private static string editUserUrl = "/api/user/update";
-        public UserRepository(string baseUrl, string jwtToken) : base(baseUrl, jwtToken)
+        public UserRepository(Dispatcher dispatcher, string baseUrl, string jwtToken) : base(dispatcher, baseUrl, jwtToken, new HubConnectionSettings("/user", "AddUser", "EditUser", "DeleteUser"))
         {
+            if (hubConnection != null)
+            {
+                hubConnection.InvokeAsync("UserOnline", userLogin);
+            }
         }
 
         public override void FillRepository()

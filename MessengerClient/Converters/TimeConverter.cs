@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Text;
 using System.Windows.Data;
 
 namespace MessengerClient.Converters
@@ -13,11 +14,22 @@ namespace MessengerClient.Converters
                 var date = (DateTime)value;
                 if (date.Date == DateTime.Now.Date)
                 {
-                    return $"{date.Hour}:{date.Minute}:{date.Second}";
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append(string.Format("{0:00}:", date.Hour));
+                    sb.Append(string.Format("{0:00}:", date.Minute));
+                    sb.Append(string.Format("{0:00}", date.Second));
+                    return sb.ToString();
                 }
                 else
                 {
-                    return $"{date.Day}.{date.Month}.{date.Year} {date.Hour}:{date.Minute}:{date.Second}";
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append(string.Format("{0:00}.", date.Day));
+                    sb.Append(string.Format("{0:00}.", date.Month));
+                    sb.Append(string.Format("{0:0000} ", date.Year));
+                    sb.Append(string.Format("{0:00}:", date.Hour));
+                    sb.Append(string.Format("{0:00}:", date.Minute));
+                    sb.Append(string.Format("{0:00}", date.Second));
+                    return sb.ToString();
                 }
             }
             return value.ToString();

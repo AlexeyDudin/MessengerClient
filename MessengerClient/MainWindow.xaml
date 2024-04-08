@@ -2,6 +2,7 @@
     x:Class="MessengerClient.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:MessengerClient.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:MessengerClient"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,8 +11,12 @@
     Title="MainWindow"
     Width="800"
     Height="450"
+    Closing="MainWindowForm_Closing"
     Loaded="Window_Loaded"
     mc:Ignorable="d">
+    <metro:MetroWindow.Resources>
+        <converters:StateConverter x:Key="StateConverter" />
+    </metro:MetroWindow.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="30*" />
@@ -26,6 +31,24 @@
             CanUserDeleteRows="False"
             ItemsSource="{Binding ElementName=MainWindowForm, Path=UserRepo.Values, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
             SelectedItem="{Binding ElementName=MainWindowForm, Path=SelectedUser, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <DataGrid.RowStyle>
+                <Style BasedOn="{StaticResource MahApps.Styles.DataGridRow}" TargetType="{x:Type DataGridRow}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=State, Mode=OneWay, Converter={StaticResource StateConverter}}" Value="False">
+                            <Setter Property="Background" Value="#FF8B8B" />
+                            <Setter Property="Foreground" Value="Black" />
+                        </DataTrigger>
+                        <!--  IsMouseOver  -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding Path=State, Mode=OneWay, Converter={StaticResource StateConverter}}" Value="False" />
+                                <Condition Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource Self}}" Value="true" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Background" Value="#FFBDBD" />
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn
                     Width="100*"
@@ -34,6 +57,9 @@
             </DataGrid.Columns>
         </DataGrid>
         <GridSplitter Grid.Column="1" />
-        <local:MessagesPage Grid.Column="2" DataContext="{Binding ElementName=MainWindowForm, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
+        <local:MessagesPage
+            x:Name="MessagePage"
+            Grid.Column="2"
+            DataContext="{Binding ElementName=MainWindowForm, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
     </Grid>
 </metro:MetroWindow>

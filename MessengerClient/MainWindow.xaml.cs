@@ -57,15 +57,11 @@ namespace MessengerClient
             {
                 selectedUser = value;
                 OnPropertyChanged(nameof(SelectedUser));
-                UpdateShowMessages();
+                MessagePage.UpdateCollection();
             } 
         }
         public void UpdateShowMessages()
         {
-            if (selectedUser != null)
-            {
-                ViewMessages = new ObservableCollection<MessageDto>(MessageRepo.Values.Where(m => m.ToUser == selectedUser.Login || m.From == selectedUser.Login));
-            }
         }
         public string MyLogin 
         { 
@@ -125,7 +121,7 @@ namespace MessengerClient
             {
                 try
                 {
-                    UserRepo = new UserRepository(endPoint, jwtToken);
+                    UserRepo = new UserRepository(this.Dispatcher, endPoint, jwtToken);
                 }
                 catch (Exception ex)
                 {
@@ -140,13 +136,21 @@ namespace MessengerClient
             {
                 try
                 {
-                    MessageRepo = new MessageRepository(endPoint, jwtToken);
+                    MessageRepo = new MessageRepository(this.Dispatcher, endPoint, jwtToken);
                 }
                 catch (Exception ex)
                 {
 
                 }
             }).Wait();
+        }
+
+        private void MainWindowForm_Closing(object sender, CancelEventArgs e)
+        {
+            if (UserRepo != null)
+                UserRepo.Dispose();
+            if (MessageRepo != null)
+                MessageRepo.Dispose();
         }
     }
 }

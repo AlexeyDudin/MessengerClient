@@ -1,9 +1,11 @@
 ﻿using Domain.Dtos;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -40,6 +42,25 @@ namespace MessengerClient
             }
             mainWindow.MessageRepo.Add(newMessage);
             MessageTextBox.Text = string.Empty;
+        }
+
+        private void ListingDataView_Filter(object sender, FilterEventArgs e)
+        {
+            IMainWindow mainWindow = (IMainWindow)DataContext;
+            if (mainWindow == null || mainWindow.SelectedUser == null)
+            {
+                e.Accepted = false;
+                return;
+            }
+
+            var item = e.Item as MessageDto;
+
+            e.Accepted = item.ToUser == mainWindow.SelectedUser.Login || item.From == mainWindow.SelectedUser.Login;
+        }
+
+        public void UpdateCollection()
+        {
+            CollectionViewSource.GetDefaultView(ListingDataView.ItemsSource).Refresh();
         }
     }
 }

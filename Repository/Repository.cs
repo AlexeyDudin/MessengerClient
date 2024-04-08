@@ -1,17 +1,16 @@
 ﻿using Domain;
-using Domain.Dtos;
 using Infrastructure;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace Repository
 {
-    public abstract class Repository<T> : INotifyPropertyChanged where T : class
+    public abstract class Repository<T> : IDisposable, INotifyPropertyChanged where T : class
     {
         private ObservableCollection<T> values = new ObservableCollection<T>();
         protected readonly string baseUrl;
@@ -20,7 +19,7 @@ namespace Repository
         protected string jwtToken = "";
         protected string userLogin = "";
 
-        public Repository(string baseUrl, string jwtToken = "", HubConnectionSettings hubSettings = null)
+        public Repository(Dispatcher dispatcher, string baseUrl, string jwtToken = "", HubConnectionSettings hubSettings = null)
         {
             this.baseUrl = baseUrl;
             this.jwtToken = jwtToken;
@@ -36,45 +35,55 @@ namespace Repository
                 {
                     hubConnection = new HubConnectionBuilder()
                         .WithUrl(baseUrl + hubSettings.SubscribeUrl)
+                        .WithAutomaticReconnect()
                         .Build();
                     if (!string.IsNullOrEmpty(hubSettings.AddFuncName))
                     {
                         // регистрируем функцию Receive для получения данных
                         hubConnection.On<T>(hubSettings.AddFuncName, (value) =>
                         {
-                            Values.Add(value);
+                            dispatcher.Invoke(() =>
+                            {
+                                Values.Add(value);
+                            });
                         });
                     }
                     if (!string.IsNullOrEmpty(hubSettings.EditFuncName))
                     {
                         hubConnection.On<T>(hubSettings.EditFuncName, (T value) =>
                         {
-                            IDomain<T> domainElem = value as IDomain<T>;
-                            IDomain<T> foundedValue = null;
-                            foreach (IDomain<T> elem in Values)
+                            dispatcher.Invoke(() =>
                             {
-                                if (elem.UniqueId == domainElem.UniqueId)
+                                IDomain<T> domainElem = value as IDomain<T>;
+                                IDomain<T> foundedValue = null;
+                                foreach (IDomain<T> elem in Values)
                                 {
-                                    foundedValue.ChangeValues(value);
-                                    break;
+                                    if (elem.UniqueId == domainElem.UniqueId)
+                                    {
+                                        elem.ChangeValues(value);
+                                        break;
+                                    }
                                 }
-                            }
+                            });
                         });
                     }
                     if (!string.IsNullOrEmpty(hubSettings.DeleteFuncName))
                     {
                         hubConnection.On<T>(hubSettings.DeleteFuncName, (T value) =>
                         {
-                            IDomain<T> domainElem = value as IDomain<T>;
-                            IDomain<T> foundedValue = null;
-                            foreach (IDomain<T> elem in Values)
+                            dispatcher.Invoke(() =>
                             {
-                                if (elem.UniqueId == domainElem.UniqueId)
+                                IDomain<T> domainElem = value as IDomain<T>;
+                                IDomain<T> foundedValue = null;
+                                foreach (IDomain<T> elem in Values)
                                 {
-                                    Values.Remove(foundedValue as T);
-                                    break;
+                                    if (elem.UniqueId == domainElem.UniqueId)
+                                    {
+                                        Values.Remove(foundedValue as T);
+                                        break;
+                                    }
                                 }
-                            }
+                            });
                         });
                     }
 
@@ -139,44 +148,6 @@ namespace Repository
         protected abstract void SendDeleteRequestToServer(T value);
         protected abstract void SendDeleteRequestToHub(T value);
 
-        //private void Values_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        //{
-        //    Task.Run(async () =>
-        //    {
-        //        if (hubSettiongs != null)
-        //        {
-        //            if (e.Action == NotifyCollectionChangedAction.Add)
-        //            {
-        //                foreach (var elem in e.NewItems)
-        //                {
-        //                    var result = await HttpRequester.SendRequestAsync<T>(baseUrl + hubSettiongs.AddFuncName, HttpRequestType.POST, jwtToken, elem);
-        //                }
-        //            }
-        //            else if (e.Action == NotifyCollectionChangedAction.Remove)
-        //            {
-        //                foreach (var elem in e.OldItems)
-        //                {
-        //                    var result = await HttpRequester.SendRequestAsync<T>(baseUrl + hubSettiongs.DeleteFuncName, HttpRequestType.DELETE, jwtToken, elem);
-        //                }
-        //            }
-        //        }
-        //    }).Wait();
-        //}
-
-
-        //{
-        //    if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
-        //    {
-        //        if (e.NewItems.Count != 0)
-        //        {
-        //            var newItem = e.NewItems[0] as T;
-        //            if (newItem != null) 
-        //            { 
-        //                connection.InvokeAsync("SendMessage", newItem);
-        //            }
-        //        }
-        //    }
-        //}
 
         public ObservableCollection<T> Values 
         {
@@ -195,11 +166,13 @@ namespace Repository
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
         public abstract void FillRepository();
-        //{
-        //    Task.Run(async () =>
-        //    {
-        //        Values = await HttpRequester.GetInfoAsync<ObservableCollection<T>>(fillConnectionString, HttpRequestType.GET, login, userLogin);
-        //    }).Wait();
-        //}
+
+        public void Dispose()
+        {
+            if (hubConnection != null)
+            {
+                hubConnection.StopAsync().Wait();
+            }
+        }
     }
 }

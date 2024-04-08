@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace Repository
 {
@@ -14,7 +15,7 @@ namespace Repository
         private static string addMessagesUrl = string.Empty; //"/api/user/add";
         private static string deleteMessagesUrl = string.Empty; //"/api/user/delete";
         private static string editMessagesUrl = string.Empty; //"/api/"
-        public MessageRepository(string baseUrl, string jwtToken = "") : base(baseUrl, jwtToken, new HubConnectionSettings("/messages", "RecieveMessage", "EditMessage", "DeleteMessage"))
+        public MessageRepository(Dispatcher dispatcher, string baseUrl, string jwtToken = "") : base(dispatcher, baseUrl, jwtToken, new HubConnectionSettings("/messages", "RecieveMessage", "EditMessage", "DeleteMessage"))
         {
         }
 

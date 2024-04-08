@@ -12,6 +12,10 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <converters:TimeConverter x:Key="TimeConverter" />
+        <CollectionViewSource
+            x:Key="Filtered"
+            Filter="ListingDataView_Filter"
+            Source="{Binding Path=MessageRepo.Values, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -19,7 +23,7 @@
             <RowDefinition MinHeight="50" MaxHeight="100" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <ListBox ItemsSource="{Binding Path=ViewMessages, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}">
+            <ListBox x:Name="ListingDataView" ItemsSource="{Binding Source={StaticResource Filtered}}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
